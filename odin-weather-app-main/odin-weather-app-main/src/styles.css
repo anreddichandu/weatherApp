@@ -1,0 +1,809 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --font-sans: 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Source Code Pro', monospace;
+  --color-bg: #f9f9f9;
+  --color-text: #333;
+  --color-accent: #007acc;
+  --max-width: 800px;
+  --card-bg-light: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --temp-current-color: #ff7f50;
+  --temp-other-color: #999;
+  --button-text: #fff;
+  --input-border: #ccc;
+  --card-bg: #ffffff;
+  --card-shadow-hover: rgba(0, 0, 0, 0.1);
+  --temp-hourly: #888;
+  --temp-primary: #2196f3;
+  --forecast-today-bg: rgba(33, 150, 243, 0.1);
+  --forecast-today-border: rgba(33, 150, 243, 0.2);
+  --forecast-high: #333;
+  --forecast-low: #666;
+  --delete-btn: #999;
+  --delete-btn-hover: #e74c3c;
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  --modal-shadow: rgba(0, 0, 0, 0.3);
+  --modal-text: #666;
+  --modal-confirm: #e74c3c;
+  --modal-confirm-hover: #c0392b;
+  --modal-cancel: #95a5a6;
+  --modal-cancel-hover: #7f8c8d;
+  --detail-border: rgba(0, 0, 0, 0.08);
+  --delete-btn-shadow: rgba(231, 76, 60, 0.3);
+}
+
+@font-face {
+  font-family: 'Lufga Medium';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Lufga Medium'), url('/fonts/LufgaMedium.woff') format('woff');
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  background-color: var(--color-bg);
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  margin-bottom: 0.5em;
+  color: var(--color-accent);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background-color: var(--color-accent);
+  color: var(--button-text);
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input,
+textarea {
+  font: inherit;
+  padding: 0.5em;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+ul {
+  list-style: none;
+}
+
+/* Navigation header styling */
+.nav-header {
+  width: 100%;
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 30px;
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-logo {
+  flex-shrink: 0;
+}
+
+#header-logo {
+  font-family: 'Lufga Medium', sans-serif;
+  font-size: 2.5rem;
+  font-weight: normal;
+  color: var(--color-accent);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.nav-controls input {
+  min-width: 200px;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.nav-controls button {
+  padding: 8px 16px;
+  background-color: var(--color-accent);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.nav-controls button:hover {
+  opacity: 0.9;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  width: 100%;
+}
+
+/* Card grid layout */
+#city-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 350px);
+  gap: 20px;
+  padding: 0 20px 40px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  justify-content: center;
+}
+
+.city-card {
+  width: 350px;
+  height: 500px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px var(--card-shadow-hover);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+  perspective: 1000px;
+}
+
+.city-card:hover {
+  transform: translateY(-2px);
+}
+
+.card-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 15px;
+}
+
+/* Card front styling */
+.card-front {
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Card back styling  */
+.card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--card-bg);
+  border-radius: 15px;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.card-back-content {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.card-back-content h3 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+  justify-content: space-around;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--detail-border);
+  flex-shrink: 0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 500;
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--temp-primary);
+}
+
+/* Card flip animation */
+.city-card .card-front {
+  display: block;
+}
+
+.city-card .card-back {
+  display: none;
+}
+
+.city-card.flipped .card-front {
+  display: none;
+}
+
+.city-card.flipped .card-back {
+  display: block;
+}
+
+.city-info {
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.weather-icon {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.weather-icon img {
+  width: 60px;
+  height: 60px;
+  filter: opacity(0.8);
+}
+
+.city-name {
+  margin: 10px 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.datetime-info {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+/* Temperature carousel styling */
+.temp-section {
+  flex-shrink: 0;
+  margin: 30px 0;
+}
+
+.hourly-temps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.hourly-temp {
+  font-size: 1.2rem;
+  color: var(--temp-hourly);
+  font-weight: 400;
+  transition: all 0.2s ease;
+}
+
+.current-temp {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--temp-primary);
+  position: relative;
+  margin: 0 10px;
+}
+
+/* Weekly forecast styling */
+.weekly-forecast {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 5px;
+  margin-top: 20px;
+}
+
+.forecast-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 2px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.forecast-day.today {
+  background: var(--forecast-today-bg);
+  border: 1px solid var(--forecast-today-border);
+}
+
+.forecast-day-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+
+.forecast-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 6px;
+  filter: opacity(0.8);
+  flex-shrink: 0;
+}
+
+.forecast-temps {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.forecast-high {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--forecast-high);
+}
+
+.forecast-low {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  color: var(--forecast-low);
+}
+
+/* Delete button styling */
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background: none;
+  color: var(--delete-btn);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: normal;
+  z-index: 10;
+  transition: color 0.2s ease;
+  line-height: 1;
+  padding: 0;
+}
+
+.delete-btn:hover {
+  color: var(--delete-btn-hover);
+  background: none;
+  transform: none;
+}
+
+.delete-btn:hover {
+  color: var(--delete-btn-hover);
+  text-shadow: 0 0 3px var(--delete-btn-shadow);
+}
+
+/* Confirmation modal styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--modal-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px var(--modal-shadow);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal h3 {
+  margin: 0 0 15px 0;
+  color: var(--color-text);
+  font-size: 1.2rem;
+}
+
+.modal p {
+  margin: 0 0 20px 0;
+  color: var(--modal-text);
+  line-height: 1.4;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.modal-btn.confirm {
+  background: var(--modal-confirm);
+  color: var(--button-text);
+}
+
+.modal-btn.confirm:hover {
+  background: var(--modal-confirm-hover);
+}
+
+.modal-btn.cancel {
+  background: var(--modal-cancel);
+  color: var(--button-text);
+}
+
+.modal-btn.cancel:hover {
+  background: var(--modal-cancel-hover);
+}
+
+/* Loading spinner styling */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  z-index: 5;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--input-border);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay .loading-text {
+  margin-top: 10px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .nav-logo {
+    text-align: center;
+  }
+
+  #header-logo {
+    font-size: 2.2rem;
+  }
+
+  .nav-controls {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .nav-controls input {
+    min-width: 150px;
+    max-width: 200px;
+    flex: 1;
+  }
+
+  .nav-controls button {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  #city-cards-container {
+    grid-template-columns: repeat(auto-fit, 320px);
+    padding: 0 15px 30px 15px;
+    gap: 15px;
+  }
+
+  .city-card {
+    width: 320px;
+    height: 450px;
+  }
+
+  .current-temp {
+    font-size: 3rem;
+  }
+
+  .hourly-temp {
+    font-size: 1rem;
+  }
+
+  .forecast-day-name {
+    font-size: 0.7rem;
+  }
+
+  .forecast-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .card-back-content {
+    padding: 15px;
+  }
+
+  .card-back-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+
+  .details-grid {
+    gap: 10px;
+  }
+
+  .detail-item {
+    padding: 6px 0;
+  }
+
+  .detail-label,
+  .detail-value {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  #header-logo {
+    font-size: 2rem;
+  }
+
+  .nav-controls {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .nav-controls input {
+    min-width: 120px;
+    max-width: 180px;
+    font-size: 0.9rem;
+  }
+
+  .nav-controls button {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  #city-cards-container {
+    grid-template-columns: 1fr;
+    padding: 0 12px 25px 12px;
+  }
+
+  .city-card {
+    width: 100%;
+    max-width: 320px;
+    height: 450px;
+    margin: 0 auto;
+  }
+
+  .current-temp {
+    font-size: 3rem;
+  }
+
+  .hourly-temp {
+    font-size: 1rem;
+  }
+
+  .card-inner {
+    padding: 20px;
+  }
+
+  .weekly-forecast {
+    gap: 4px;
+  }
+
+  .forecast-day {
+    padding: 8px 2px;
+  }
+
+  .forecast-day-name {
+    font-size: 0.7rem;
+  }
+
+  .forecast-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .card-back-content {
+    padding: 15px;
+  }
+
+  .card-back-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+  }
+
+  .details-grid {
+    gap: 10px;
+  }
+
+  .detail-item {
+    padding: 6px 0;
+  }
+
+  .detail-label,
+  .detail-value {
+    font-size: 0.85rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .nav-container {
+    padding: 20px;
+  }
+
+  #header-logo {
+    font-size: 2.8rem;
+  }
+
+  .nav-controls input {
+    min-width: 220px;
+  }
+
+  .city-card {
+    width: 320px;
+    height: 450px;
+  }
+
+  #city-cards-container {
+    grid-template-columns: repeat(auto-fit, 320px);
+    gap: 20px;
+    padding: 0 20px 40px 20px;
+  }
+
+  .current-temp {
+    font-size: 3rem;
+  }
+
+  .hourly-temp {
+    font-size: 1rem;
+  }
+
+  .forecast-day-name {
+    font-size: 0.7rem;
+  }
+
+  .forecast-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
